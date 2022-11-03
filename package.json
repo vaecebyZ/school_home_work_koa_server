@@ -1,0 +1,24 @@
+{
+  "name": "online-learn-system",
+  "version": "1.0.0",
+  "description": "online learn systeqm",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "koa",
+    "mysql"
+  ],
+  "author": "yin hong",
+  "license": "MIT",
+  "dependencies": {
+    "koa": "^2.13.4",
+    "koa-bodyparser": "^4.3.0",
+    "koa-router": "^12.0.0",
+    "moment": "^2.29.4",
+    "mysql": "^2.18.1",
+    "uuid": "^9.0.0"
+  }
+}
