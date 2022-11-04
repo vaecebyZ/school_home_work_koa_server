@@ -5,6 +5,7 @@ const port = 1213;
 const router = new Router(); // 创建路由，支持传递参数
 const userRouter = require("./api/user");
 const homeRouter = require("./api/home");
+const playground = require("./api/playground");
 const bodyParser = require('koa-bodyparser')
 
 app.use(bodyParser())
@@ -18,6 +19,11 @@ app.use(homeRouter.allowedMethods());
 // 用户接口
 app.use(userRouter.routes());
 app.use(userRouter.allowedMethods());
+
+
+// 广场接口
+app.use(playground.routes());
+app.use(playground.allowedMethods());
 
 // index配置
 app.use(router.routes());
