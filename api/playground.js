@@ -16,7 +16,23 @@ playground.get("/api/playground", async (ctx) => {
   const page = ctx.query.page || 0;
 
   const results = await db.query(
-    `select * from playground limit ${page * 10},${page * 10 + 10};`
+    `SELECT
+    p.pId,
+    pTime,
+    pTitle,
+    pContent,
+    u.uId,
+    uName,
+    uAvatar,
+    p.ups,
+    collections,
+    count(r.rId) as comments
+  FROM
+    playground p
+  LEFT JOIN user u ON p.uId = u.uId
+  LEFT JOIN reply r ON p.pId = r.pId
+  GROUP BY (p.pId) ORDER BY p.pTime desc
+  LIMIT ${page * 10},${page * 10 + 10}`
   );
 
   ctx.body.playgroundList = results;
@@ -53,7 +69,7 @@ playground.post("/api/playground/post", async (ctx) => {
   data.pTime = moment().format("YYYY-MM-DD HH:mm");
 
   const results = await db.query(
-    `insert into playground values('${data.pId}','${data.pTime}','${data.pTitle}','${data.pContent}','${data.uId}')`
+    `insert into playground values('${data.pId}','${data.pTime}','${data.pTitle}','${data.pContent}','0','${data.uId}')`
   );
 
   // 有且仅有一个
@@ -66,5 +82,38 @@ playground.post("/api/playground/post", async (ctx) => {
   }
 });
 
+// 发布点赞
+playground.post("/api/playground/up", async (ctx) => {
+  ctx.body = {
+    info: "帖子点赞接口",
+    code: 500,
+    success: false,
+    msg: "点赞失败！",
+  };
+
+  // 构造参数
+  let data = {
+    pId: "",
+    ups: 0,
+  };
+
+  Object.keys(data).map((prop) => {
+    data[prop] = ctx.request.body[prop];
+  });
+
+  data.ups = +data.ups + 1;
+
+  const results = await db.query(
+    `update  playground set ups = ${data.ups} where pId = '${data.pId}' `
+  );
+
+  // 有且仅有一个
+  if (results.affectedRows == 1) {
+    ctx.body.success = true;
+    ctx.body.code = 200;
+    ctx.response.status = 200;
+    ctx.body.msg = "点赞成功!";
+  }
+});
 
 module.exports = playground;
