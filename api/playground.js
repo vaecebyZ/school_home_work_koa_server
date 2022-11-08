@@ -82,7 +82,7 @@ playground.post("/api/playground/post", async (ctx) => {
   }
 });
 
-// 发布点赞
+// 点赞
 playground.post("/api/playground/up", async (ctx) => {
   ctx.body = {
     info: "帖子点赞接口",
@@ -113,6 +113,48 @@ playground.post("/api/playground/up", async (ctx) => {
     ctx.body.code = 200;
     ctx.response.status = 200;
     ctx.body.msg = "点赞成功!";
+  }
+});
+
+// 获取详情
+playground.get("/api/playground/detail", async (ctx) => {
+  ctx.body = {
+    info: "获取帖子详情",
+    code: 500,
+    success: false,
+    msg: "获取帖子详情失败！",
+  };
+
+  console.log(ctx.query);
+
+  const pId = ctx.query.pId || null;
+  if (pId) {
+    // 帖子详情
+    const postResults = await db.query(
+      `select * from playground  where pId = '${pId}'`
+    );
+
+    // 帖子回复
+    if (postResults.length === 1) {
+
+      const [post] = postResults;
+
+      const rebackResults = await db.query(
+        `select * from reply where pId = '${pId}'`
+      );  
+      
+      post.replayList = rebackResults
+      
+
+      
+      ctx.body.playgroundDetail = post
+      ctx.body.success = true;
+      ctx.body.code = 200;
+      ctx.response.status = 200;
+      ctx.body.msg = "获取成功!";
+    }
+
+   
   }
 });
 
