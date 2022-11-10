@@ -42,6 +42,46 @@ playground.get("/api/playground", async (ctx) => {
   ctx.body.msg = "获取成功!";
 });
 
+// 评论
+playground.post("/api/playground/comment", async (ctx) => {
+  ctx.body = {
+    info: "评论接口",
+    code: 500,
+    success: false,
+    msg: "评论失败",
+  };
+
+  // 构造参数
+  let data = {
+    pId: "",
+    rId: "",
+    rTime: "",
+    uId: "",
+    comment: null,
+  };
+
+  Object.keys(data).map((prop) => {
+    data[prop] = ctx.request.body[prop];
+  });
+
+  data.rId = uuidv4();
+
+  data.rTime = moment().format("YYYY-MM-DD HH:mm");
+
+  const results = await db.query(
+    `insert into reply values('${data.rId}','${data.pId}','${data.rTime}','${data.comment}','${data.uId}')`
+  );
+
+  // 有且仅有一个
+  if (results.affectedRows == 1) {
+    ctx.body.success = true;
+    ctx.body.code = 200;
+    ctx.response.status = 200;
+    ctx.body.msg = "评论成功!";
+    ctx.body.id = data.rId;
+  }
+});
+
 // 发布内容
 playground.post("/api/playground/post", async (ctx) => {
   ctx.body = {
@@ -131,30 +171,24 @@ playground.get("/api/playground/detail", async (ctx) => {
   if (pId) {
     // 帖子详情
     const postResults = await db.query(
-      `select * from playground  where pId = '${pId}'`
+      `select p.pId,p.pTime,p.pTitle,p.pContent,p.ups,u.uId,u.uName,u.uAvatar from playground p,user u  where p.pId = '${pId}' and p.uId = u.uId`
     );
 
     // 帖子回复
     if (postResults.length === 1) {
-
       const [post] = postResults;
 
       const rebackResults = await db.query(
-        `select * from reply where pId = '${pId}'`
-      );  
-      
-      post.replayList = rebackResults
-      
+        `select r.rId,r.rTime,r.rContent,u.uId,u.uName,u.uAvatar from reply r,user u where pId = '${pId}' and r.uId = u.uId ORDER BY rTime`
+      );
 
-      
-      ctx.body.playgroundDetail = post
+      post.replayList = rebackResults;
+      ctx.body.playgroundDetail = post;
       ctx.body.success = true;
       ctx.body.code = 200;
       ctx.response.status = 200;
       ctx.body.msg = "获取成功!";
     }
-
-   
   }
 });
 
