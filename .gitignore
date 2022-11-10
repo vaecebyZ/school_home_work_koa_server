@@ -25,5 +25,4 @@ yarn.lock
 src/views/modules/oa/cpc/partybuild/PartyBuildForm copy.vue
 src/views/modules/oa/cpc/partybuild/PartyBuildList copy.vue
 src/views/modules/oa/cpc/partybuild/PartyBuildParticipantsForm copy.vue
-package-lock.json
 node_modules.zip
